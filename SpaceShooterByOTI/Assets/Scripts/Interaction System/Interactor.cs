@@ -6,51 +6,29 @@ using UnityEngine.Video;
 
 public class Interactor : MonoBehaviour
 {
+    [SerializeField] private float _interactRange;
+    [SerializeField] private LayerMask _interactableLayer;
 
-    interface IInteractable 
+private void OnInteract()
+{
+    Debug.Log("Interaction Key Pressed");
+    Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward * _interactRange, Color.red);
+
+    Ray ray = new Ray(transform.position, transform.forward);
+    RaycastHit hit;
+
+    if (Physics.Raycast(ray, out hit, _interactRange, _interactableLayer))
     {
-        public void Interact();
-    }
-    private Transform InteractorSource;
-    [SerializeField] private float InteractRange;
+        Debug.Log("Interacted with: " + hit.collider.name + " on layer " + LayerMask.LayerToName(hit.collider.gameObject.layer));
 
-    
-
-    void Awake()
-    {
-        
-    }
-    void OnEnable()
-    {
-
-    }
-
-    void OnDisable()
-    {
-
-    }
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-
-    }
-
-    private void OnInteract()
-    {
-        Debug.Log("Interacted");
-        Debug.DrawLine(this.transform.position, this.transform.position + this.transform.forward, Color.red, 2f);
-
-        Ray r = new(InteractorSource.position, InteractorSource.forward);
-        if (Physics.Raycast(r, out RaycastHit hitInfo, InteractRange))
+        // Try to get the IInteractable interface from the hit object
+        IInteractable interactable = hit.collider.GetComponent<IInteractable>();
+        if (interactable != null)
         {
-            if (hitInfo.collider.gameObject.TryGetComponent(out IInteractable interactObj))
-            {
-                interactObj.Interact();
-            }
+            interactable.Interact();
         }
     }
+}
+
+
 }
